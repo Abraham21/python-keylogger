@@ -28,6 +28,8 @@ log_dir = ""
 host_name = "N/A"
 host_ip = "N/A"
 external_ip = "N/A"
+# beginning time of script
+start_time = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
 # this is a function from the 
 # sets file to log to with file name and path
@@ -46,7 +48,6 @@ def writeFile(start_time, host_name, host_ip, external_ip):
 # IP address 
 def get_Host_name_IP(): 
     try: 
-        start_time = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         host_name = socket.gethostname() 
         host_ip = socket.gethostbyname(host_name)
         external_ip = ipgetter.myip()

